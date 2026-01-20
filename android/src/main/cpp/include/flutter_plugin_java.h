@@ -221,9 +221,10 @@ public:
 	 * 音声取得開始
 	 * レンダーコールバックを呼び出さないと実際には描画されない
 	 * @param device_id UVC機器識別用のID
+	 * @param send_port
 	 * @return
 	 */
-	int start_uac(const int32_t &device_id);
+	int start_uac(const int32_t &device_id, const int64_t &send_port);
 	/**
 	 * 音声取得終了
 	 * @param device_id UVC機器識別用のID
@@ -248,8 +249,8 @@ public:
 	int get_uac_frame(const int32_t &device_id, uint8_t *data, uint32_t *data_len, int64_t *pts_us);
 };
 
-typedef std::shared_ptr<FlutterPluginJava> FlutterPluginJavaSp;
-typedef std::unique_ptr<FlutterPluginJava> FlutterPluginJavaUp;
+using FlutterPluginJavaSp = std::shared_ptr<FlutterPluginJava>;
+using FlutterPluginJavaUp = std::unique_ptr<FlutterPluginJava>;
 
 }	// namespace serenegiant::flutter
 

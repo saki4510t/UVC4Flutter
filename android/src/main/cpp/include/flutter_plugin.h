@@ -146,16 +146,17 @@ int32_t set_preview_surface(
  * @return
  */
 EXTERN_C
-int32_t get_uac_state(const int32_t &device_id);
+int32_t get_uac_state(int32_t device_id);
 
 /**
  * 音声取得開始
  * 音声データを受信するたびにRegister時に指定したuac_callbackが呼び出される
  * @param device_id
+ * @param send_port
  * @return
  */
 EXTERN_C
-int32_t start_uac(int32_t device_id) ;
+int32_t start_uac(int32_t device_id, int64_t send_port);
 
 /**
  * 音声取得終了

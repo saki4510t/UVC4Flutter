@@ -42,20 +42,13 @@ const _supportedCtrls = <int>[
   FLG_CTRL_AE,
   FLG_CTRL_AE_PRIORITY,
   FLG_CTRL_AE_ABS,
-  FLG_CTRL_AE_REL,
   FLG_CTRL_FOCUS_AUTO,
   FLG_CTRL_FOCUS_ABS,
-  FLG_CTRL_FOCUS_REL,
   FLG_CTRL_IRIS_ABS,
-  FLG_CTRL_IRIS_REL,
   FLG_CTRL_ZOOM_ABS,
-  FLG_CTRL_ZOOM_REL,
   FLG_CTRL_PAN_ABS,
   FLG_CTRL_TILT_ABS,
-  FLG_CTRL_PAN_REL,
-  FLG_CTRL_TILT_REL,
   FLG_CTRL_ROLL_ABS,
-  FLG_CTRL_ROLL_REL,
   FLG_CTRL_PRIVACY,
 ];
 
@@ -313,10 +306,11 @@ class UVCController implements UVCControllerInterface {
 
   /// UAC機器からの音声取得を開始
   @override
-  Future<int> startUAC() async {
-    if (_debug) _logger.d("UVCController#start:deviceId=$deviceId,state=${uacState()}");
-    if ((uacState() == device_state.CONNECTED)) {
-      return compute(_startUac, deviceId);
+  Future<int> startUAC(int sendPort) async {
+    var state = uacState();
+    if (_debug) _logger.d("UVCController#start:deviceId=$deviceId,state=$state");
+    if ((state == device_state.CONNECTED)) {
+      return compute(_startUac, sendPort);
     } else {
       return 0;
     }
@@ -328,7 +322,7 @@ class UVCController implements UVCControllerInterface {
     if (_debug) _logger.d("UVCController#stop:deviceId=$deviceId,state=${state()}");
     // stopをcomputeで非同期呼び出しするとテクスチャ/Surfaceの破棄の
     // タイミングと合わないので直接呼び出す
-    return _binding.start_uac(deviceId);
+    return _binding.stop_uac(deviceId);
   }
 
   /// UAC情報を取得
@@ -354,8 +348,8 @@ class UVCController implements UVCControllerInterface {
 
   /// uacStartの下請け
   /// computeの引数にffiのバインディングを渡すとクラッシュするので通常のdart関数としてラップ
-  int _startUac(int id) {
-    return _binding.start_uac(id);
+  int _startUac(int sendPort) {
+    return _binding.start_uac(deviceId, sendPort);
   }
 
   /// 映像設定を適用
@@ -549,8 +543,14 @@ class UVCManager with ChangeNotifier, WidgetsBindingObserver implements UVCManag
     final action = message[0];
     switch (action) {
       case 'on_device_changed':
-      // 機器接続・切断イベントメッセージを受信したときの処理
-        _handleOnDeviceChanged(message[1], message[2]);
+        // 機器接続・切断イベントメッセージを受信したときの処理
+        final int deviceId = message[1];
+        final bool attached = message[2];
+        if (attached) {
+          _handleOnDeviceAttached(deviceId);
+        } else {
+          _handleOnDeviceDetached(deviceId);
+        }
         break;
       default:
         if (_debug) _logger.d('unknown received message:$message');
@@ -615,20 +615,23 @@ class UVCManager with ChangeNotifier, WidgetsBindingObserver implements UVCManag
     });
   }
 
-  /// USB機器の接続状態が変化したときの処理
-  void _handleOnDeviceChanged(int deviceId, bool attached) {
-    if (_debug) _logger.d('UVCManager#onDeviceChanged:deviceId=$deviceId,attached=$attached');
-    if (attached) {
-      if (!_availableControllers.containsKey(deviceId)) {
-        if (_debug) _logger.d("handleOnDeviceChanged:create UVCController");
-        var connector = UVCController(deviceId: deviceId);
-        _availableControllers[deviceId] = connector;
-        // if (_debug) _logger.d("info=${connector.getDeviceInfo()}");
-      }
-    } else {
-      var controller = _availableControllers.remove(deviceId);
-      controller?.detached();
+  /// USB機器が接続されたときの処理
+  void _handleOnDeviceAttached(int deviceId) {
+    if (_debug) _logger.d('_handleOnDeviceAttached:deviceId=$deviceId');
+    if (!_availableControllers.containsKey(deviceId)) {
+      if (_debug) _logger.d("_handleOnDeviceAttached:create UVCController");
+      var connector = UVCController(deviceId: deviceId);
+      _availableControllers[deviceId] = connector;
+      // if (_debug) _logger.d("info=${connector.getDeviceInfo()}");
     }
+    notifyListeners();
+  }
+
+  /// USB機器が取り外されたときの処理
+  void _handleOnDeviceDetached(int deviceId) {
+    if (_debug) _logger.d('_handleOnDeviceDetached:deviceId=$deviceId');
+    var controller = _availableControllers.remove(deviceId);
+    controller?.detached();
     notifyListeners();
   }
 }
@@ -674,6 +677,7 @@ String _arrayToString(ffi.Array<ffi.Uint8> array) {
 
 /// FFI経由で読み取ったバックエンド側の情報からVideoSizeを生成するヘルパー関数
 VideoSize createVideoSizeFrom(flutter_video_size sz) {
+  if (_debug) _logger.d("num_frame_intervals=${sz.num_frame_intervals}/${sz.frame_intervals.elements.length},num_fps=${sz.num_fps}/${sz.fps.elements.length}");
   var frameIntervals = <int>[];
   for (int i = 0; i < sz.num_frame_intervals; i++) {
     frameIntervals.add(sz.frame_intervals[i]);

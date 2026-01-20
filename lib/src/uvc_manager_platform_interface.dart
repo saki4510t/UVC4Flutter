@@ -96,7 +96,7 @@ abstract class UVCControllerInterface {
   }
 
   /// UVC機器からの音声取得を開始
-  Future<int> startUAC() async {
+  Future<int> startUAC(int sendPort) async {
     throw UnimplementedError('start() has not been implemented.');
   }
 

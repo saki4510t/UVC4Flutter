@@ -123,11 +123,11 @@ void FlutterPluginJava::terminate_all() {
  * @param create_if_absent
  * @return
  */
-std::shared_ptr<FlutterUACHolder> FlutterPluginJava::get_uac_holder_locked(const int32_t &device_id, const bool &create_if_absent) {
+FlutterUACHolderSp FlutterPluginJava::get_uac_holder_locked(const int32_t &device_id, const bool &create_if_absent) {
 	ENTER();
 
 	LOGD("id=%d,create_if_absent=%d", device_id, create_if_absent);
-	LOGD("num holders=%" FMT_SIZE_T, holders.size());
+	LOGD("num holders=%" FMT_SIZE_T, uac_holders.size());
 
 	FlutterUACHolderSp result;
 	auto iter = uac_holders.find(device_id);
@@ -155,7 +155,7 @@ FlutterUVCHolderSp FlutterPluginJava::get_uvc_holder_locked(const int32_t &devic
 	ENTER();
 
 	LOGD("id=%d,create_if_absent=%d", device_id, create_if_absent);
-	LOGD("num holders=%" FMT_SIZE_T, holders.size());
+	LOGD("num holders=%" FMT_SIZE_T, uvc_holders.size());
 
 	FlutterUVCHolderSp result;
 	auto iter = uvc_holders.find(device_id);
@@ -219,12 +219,12 @@ void FlutterPluginJava::remove(const int32_t &device_id) {
 		}
 	}
 	if (uvc_removed) {
-		LOGD("remove %d", id);
+		LOGD("remove %d", device_id);
 		uvc_removed->stop();
 		LOGD("remove: finished");
 	}
 	if (uac_removed) {
-		LOGD("remove %d", id);
+		LOGD("remove %d", device_id);
 		uac_removed->stop();
 		LOGD("remove: finished");
 	}
@@ -605,10 +605,11 @@ device_state_t FlutterPluginJava::get_uac_state(const int32_t &device_id) {
 /**
  * 音声取得開始
  * @param device_id UAC機器識別用のID
+ * @param send_port
  * @return
  */
 /*public*/
-int FlutterPluginJava::start_uac(const int32_t &device_id) {
+int FlutterPluginJava::start_uac(const int32_t &device_id, const int64_t &send_port) {
 	ENTER();
 
 	int result = -1;
@@ -619,7 +620,7 @@ int FlutterPluginJava::start_uac(const int32_t &device_id) {
 	}
 	if (holder && !holder->is_running()) {
 		// まだ音声取得開始していないとき
-		result = holder->start();
+		result = holder->start(send_port);
 	}
 
 	RETURN(result, int);

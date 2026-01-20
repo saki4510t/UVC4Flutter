@@ -1,4 +1,4 @@
-// Copyright (c) 2020-2025 saki t_saki@serenegiant.com
+// Copyright (c) 2020-2026 saki t_saki@serenegiant.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,19 +70,12 @@ class ControlInfo {
     case FLG_CTRL_AE: return "CTRL_AE";
     case FLG_CTRL_AE_PRIORITY: return "CTRL_AE_PRIORITY";
     case FLG_CTRL_AE_ABS: return "CTRL_AE_ABS";
-    case FLG_CTRL_AE_REL: return "CTRL_AE_REL";
     case FLG_CTRL_FOCUS_ABS: return "CTRL_FOCUS_ABS";
-    case FLG_CTRL_FOCUS_REL: return "CTRL_FOCUS_REL";
     case FLG_CTRL_IRIS_ABS: return "CTRL_IRIS_ABS";
-    case FLG_CTRL_IRIS_REL: return "CTRL_IRIS_REL";
     case FLG_CTRL_ZOOM_ABS: return "CTRL_ZOOM_ABS";
-    case FLG_CTRL_ZOOM_REL: return "CTRL_ZOOM_REL";
     case FLG_CTRL_PAN_ABS: return "CTRL_PAN_ABS";
     case FLG_CTRL_TILT_ABS: return "CTRL_TILT_ABS";
-    case FLG_CTRL_PAN_REL: return "CTRL_PAN_REL";
-    case FLG_CTRL_TILT_REL: return "CTRL_TILT_REL";
     case FLG_CTRL_ROLL_ABS: return "CTRL_ROLL_ABS";
-    case FLG_CTRL_ROLL_REL: return "CTRL_ROLL_REL";
     case FLG_CTRL_FOCUS_AUTO: return "CTRL_FOCUS_AUTO";
     case FLG_CTRL_PRIVACY: return "CTRL_PRIVACY";
     case FLG_PU_BRIGHTNESS: return "PU_BRIGHTNESS";
@@ -99,10 +92,6 @@ class ControlInfo {
     case FLG_PU_HUE_AUTO: return "PU_HUE_AUTO";
     case FLG_PU_WB_TEMP_AUTO: return "PU_WB_TEMP_AUTO";
     case FLG_PU_WB_COMPO_AUTO: return "PU_WB_COMPO_AUTO";
-    case FLG_PU_DIGITAL_MULT: return "PU_DIGITAL_MULT";
-    case FLG_PU_DIGITAL_LIMIT: return "PU_DIGITAL_LIMIT";
-    case FLG_PU_AVIDEO_STD: return "PU_AVIDEO_STD";
-    case FLG_PU_AVIDEO_LOCK: return "PU_AVIDEO_LOCK";
     case FLG_PU_CONTRAST_AUTO: return "PU_CONTRAST_AUTO";
     default: return "UNKNOWN($type)";
     }

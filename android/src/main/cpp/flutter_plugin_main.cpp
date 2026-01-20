@@ -72,7 +72,7 @@ int32_t get_state(int32_t device_id) {
 }
 
 DART_EXPORT
-int32_t get_device_info(const int32_t device_id, usb_device_info_t *info_out) {
+int32_t get_device_info(int32_t device_id, usb_device_info_t *info_out) {
 	ENTER();
 
 	LOGV("id=%d", device_id);
@@ -87,7 +87,7 @@ int32_t get_device_info(const int32_t device_id, usb_device_info_t *info_out) {
 }
 
 DART_EXPORT
-int64_t start(const int32_t device_id) {
+int64_t start(int32_t device_id) {
 	ENTER();
 
 	LOGV("id=%d", device_id);
@@ -101,7 +101,7 @@ int64_t start(const int32_t device_id) {
 }
 
 DART_EXPORT
-int32_t stop(const int32_t device_id) {
+int32_t stop(int32_t device_id) {
 	ENTER();
 
 	LOGV("id=%d", device_id);
@@ -116,9 +116,9 @@ int32_t stop(const int32_t device_id) {
 
 DART_EXPORT
 int set_video_size(
-	const int32_t device_id,
-	const uint32_t type,
-	const uint32_t width, const uint32_t height) {
+	int32_t device_id,
+	uint32_t type,
+	uint32_t width, uint32_t height) {
 
 	ENTER();
 
@@ -309,7 +309,7 @@ int32_t set_preview_surface(
  * @return
  */
 DART_EXPORT
-int32_t get_uac_state(const int32_t &device_id) {
+int32_t get_uac_state(int32_t device_id) {
 	ENTER();
 
 	LOGV("id=%d", device_id);
@@ -329,13 +329,13 @@ int32_t get_uac_state(const int32_t &device_id) {
  * @return
  */
 DART_EXPORT
-int32_t start_uac(int32_t device_id) {
+int32_t start_uac(int32_t device_id, int64_t send_port) {
 	ENTER();
 
 	int32_t  result = -1;
 	std::lock_guard<std::mutex> lock(plugin_lock);
 	if (pluginJava) {
-		result = pluginJava->start_uac(device_id);
+		result = pluginJava->start_uac(device_id, send_port);
 	}
 
 	RETURN(result, int32_t);

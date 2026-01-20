@@ -1,4 +1,4 @@
-// Copyright (c) 2020-2025 saki t_saki@serenegiant.com
+// Copyright (c) 2020-2026 saki t_saki@serenegiant.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import 'package:logger/logger.dart';
 import 'package:uvc_manager/uvc_manager.dart';
 import './uvc_control_value.dart';
 import './uvc_control_settings.dart';
+import './uvc_preview.dart';
 
 //--------------------------------------------------------------------------------
 // 定数定義

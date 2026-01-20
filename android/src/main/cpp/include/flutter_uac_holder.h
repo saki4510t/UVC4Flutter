@@ -29,6 +29,15 @@ class FlutterUACHolder {
 private:
 	const int32_t m_device_id;
 	usb_manager_t *m_manager;
+	int64_t m_send_port;
+
+	static void on_uac_data_func(
+		usb_manager_t *manager, int32_t device_id,
+		void *callback_args,
+		uint8_t *data, uint32_t data_len, int64_t pts_us);
+	void on_uac_data(
+		const usb_manager_t *manager, const int32_t &device_id,
+		const uint8_t *data, const uint32_t &data_len, const int64_t &pts_us);
 protected:
 public:
 	/**
@@ -49,10 +58,10 @@ public:
 
 	/**
 	 * 音声取得開始
-	 * @param connector
+	 * @param send_port
 	 * @return
 	 */
-	int start();
+	int start(const int64_t &send_port);
 	/**
 	 * 音声取得終了
 	 * @return
@@ -76,8 +85,8 @@ public:
 	int get_uac_info(uac_info_t &info);
 };
 
-typedef std::shared_ptr<FlutterUACHolder> FlutterUACHolderSp;
-typedef std::unique_ptr<FlutterUACHolder> FlutterUACHolderUp;
+using FlutterUACHolderSp = std::shared_ptr<FlutterUACHolder>;
+using FlutterUACHolderUp = std::unique_ptr<FlutterUACHolder>;
 
 } // serenegiant::flutter
 

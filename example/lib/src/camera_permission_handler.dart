@@ -1,4 +1,4 @@
-// Copyright (c) 2020-2025 saki t_saki@serenegiant.com
+// Copyright (c) 2020-2026 saki t_saki@serenegiant.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 
 import 'package:permission_handler/permission_handler.dart';
 
+/// 元々はカメラパーミッションしか要求していなかったので名前がCameraPermissionsHandlerだけど
+/// 今はカメラパーミッションと音声取得パーミッションの２つを要求する
 class CameraPermissionsHandler {
   // シングルトンパターンでアクセスできるようにする
   static final CameraPermissionsHandler _instance = CameraPermissionsHandler._internal();
@@ -24,21 +26,16 @@ class CameraPermissionsHandler {
   CameraPermissionsHandler._internal();
 
   Future<bool> get isGranted async {
-    final status = await Permission.camera.status;
-    switch (status) {
-      case PermissionStatus.granted:
-      case PermissionStatus.limited:
-        return true;
-      case PermissionStatus.denied:
-      case PermissionStatus.permanentlyDenied:
-      case PermissionStatus.restricted:
-        return false;
-      default:
-        return false;
-    }
+    final micStatus = await Permission.microphone.status;
+    final cameraStatus = await Permission.camera.status;
+    return (micStatus == PermissionStatus.granted || micStatus == PermissionStatus.limited)
+        && (cameraStatus == PermissionStatus.granted || cameraStatus == PermissionStatus.limited);
   }
 
-  Future<PermissionStatus> request() async {
-    return Permission.camera.request();
+  Future<Map<Permission, PermissionStatus>> request() {
+    return [
+      Permission.camera,
+      Permission.microphone,
+    ].request();
   }
 }

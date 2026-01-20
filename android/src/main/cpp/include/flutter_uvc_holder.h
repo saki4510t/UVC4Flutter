@@ -186,8 +186,8 @@ public:
 
 };
 
-typedef std::shared_ptr<FlutterUVCHolder> FlutterUVCHolderSp;
-typedef std::unique_ptr<FlutterUVCHolder> FlutterUVCHolderUp;
+using FlutterUVCHolderSp = std::shared_ptr<FlutterUVCHolder>;
+using FlutterUVCHolderUp = std::unique_ptr<FlutterUVCHolder>;
 
 } // namespace serenegiant::flutter
 #endif //AANDUSB_FLUTTER_UVC_HOLDER_H

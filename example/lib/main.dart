@@ -1,4 +1,4 @@
-// Copyright (c) 2020-2025 saki t_saki@serenegiant.com
+// Copyright (c) 2020-2026 saki t_saki@serenegiant.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,14 +65,15 @@ class _MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<_MainScreen> {
-  bool hasCameraPermission = false;
+  bool hasAllPermission = false;
 
   @override
   void initState() {
     super.initState();
-    // XXX ユーザーがカメラパーミッションを拒絶したときは説明画面を表示and端末のアプリ設定へ移動してカメラパーミッションを設定するように促しそれでも拒絶するならアプリを終了させる必要がある
+    // XXX ユーザーがカメラ/音声取得パーミッションを拒絶したときは説明画面を表示and端末のアプリ設定へ移動してカメラ/音声取得パーミッションを設定するように促しそれでも拒絶するならアプリを終了させる必要がある
     CameraPermissionsHandler().request().then((status) => setState(() {
-      hasCameraPermission = status.isGranted || status.isLimited;
+      final denied = status.entries.where((element) => !element.value.isGranted && !element.value.isLimited);
+      hasAllPermission = denied.isEmpty;
     }));
   }
 
@@ -88,7 +89,7 @@ class _MainScreenState extends State<_MainScreen> {
             children: [
               const SizedBox(width: 4),
               Expanded(
-                child: hasCameraPermission
+                child: hasAllPermission
                   ? UVCManagerView(
                     videoWidth: 1280, videoHeight: 720,
                     noDeviceMessage: Text(

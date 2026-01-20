@@ -1,6 +1,5 @@
 /**
- * aAndUsb
- * Copyright (c) 2014-2026 saki t_saki@serenegiant.com
+ * Copyright (c) 2020-2026 saki t_saki@serenegiant.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,6 +178,12 @@ int usb_get_device_info(usb_manager_t *manager, int32_t device_id, usb_device_in
 // native Cバインディング/UVC
 //--------------------------------------------------------------------------------
 /**
+ * フレームインターバル/フレームレートの最大数
+ * とりあえず128に制限
+ */
+#define MAX_NUM_INTERVALS (128)
+
+/**
  * UVC機器のコントロール機能の情報を取得するための構造体
  */
 typedef struct _uvc_control_info {
@@ -220,7 +225,7 @@ public:
 	/**
 	 * フレームインターバルデータ
 	 */
-	uint32_t *frame_intervals;
+	uint32_t frame_intervals[MAX_NUM_INTERVALS];
 	/**
 	 * フレームインターバルデータの個数
 	 */
@@ -228,7 +233,7 @@ public:
 	/**
 	 * フレームレート
 	 */
-	float *fps;
+	float fps[MAX_NUM_INTERVALS];
 	/**
 	 * フレームレートの個数
 	 */
@@ -456,7 +461,17 @@ typedef struct _uac_info {
 } __attribute__((__packed__)) uac_info_t;
 
 /**
+ * コールバック関数で音声データを受け取る場合のコールバック関数型
+ */
+typedef void (*on_uac_data_callback_t)(
+	usb_manager_t*, int32_t device_id,
+	void *callback_args,
+	uint8_t *data, uint32_t data_len, int64_t pts_us);
+
+/**
  * 機器との接続状態を取得
+ * @param manager
+ * @param device_id UVC機器識別用のID
  * @return
  */
 device_state_t uac_get_device_state(usb_manager_t *manager, int32_t device_id);
@@ -464,13 +479,26 @@ device_state_t uac_get_device_state(usb_manager_t *manager, int32_t device_id);
 /**
  * 音声取得開始
  * uac_get_frameを呼び出さないと音声取得できない
+ * @param manager
  * @param device_id UVC機器識別用のID
  * @return
  */
-int uac_start(usb_manager_t *manager, int32_t device_id);
+#define uac_start(MANAGER, DEVICE_ID) uac_start_callback((MANAGER), (DEVICE_ID), 0, 0)
+
+/**
+ * 音声取得開始
+ * callbackがnullの場合はuac_get_frameを使って音声データ取得する
+ * @param manager
+ * @param device_id UVC機器識別用のID
+ * @return
+ */
+int uac_start_callback(
+	usb_manager_t *manager, int32_t device_id,
+	on_uac_data_callback_t callback, void *callback_args);
 
 /**
  * 音声取得終了
+ * @param manager
  * @param device_id UVC機器識別用のID
  * @return
  */
@@ -478,6 +506,7 @@ int uac_stop(usb_manager_t *manager, int32_t device_id);
 
 /**
  * 音声取得設定を取得
+ * @param manager
  * @param device_id UVC機器識別用のID
  * @param info
  * @return
@@ -488,6 +517,7 @@ int uac_get_info(
 
 /**
  * 音声フレームをフレームキューから読み取る
+ * @param manager
  * @param device_id UVC機器識別用のID
  * @param data nullptrなら*lenにフレームデータのバイト数をセットするだけで実際の読み取りは行わない
  * @param data_len 音声フレームのバイト数

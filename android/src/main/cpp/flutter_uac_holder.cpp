@@ -30,6 +30,9 @@
 
 // aandusb
 #include "utilbase.h"
+// dart
+#include "dartAPIDL/dart_api_dl.h"
+#include "dartAPIDL/dart_native_api.h"
 // Flutter plugin
 #include "flutter_uac_holder.h"
 
@@ -41,7 +44,8 @@ namespace serenegiant::flutter {
 /*public*/
 FlutterUACHolder::FlutterUACHolder(usb_manager_t *manager, const int32_t &device_id)
 :	m_manager(manager),
-	m_device_id(device_id)
+	m_device_id(device_id),
+	m_send_port(0)
 {
 	ENTER();
 	EXIT();
@@ -73,12 +77,16 @@ bool FlutterUACHolder::is_running() const {
 
 /**
  * 音声取得開始
- * @param connector
+ * @param send_port
  * @return
  */
-int FlutterUACHolder::start() {
+int FlutterUACHolder::start(const int64_t &send_port) {
 	ENTER();
-	RETURN(uac_start(m_manager, m_device_id), int);
+
+	m_send_port = send_port;
+	auto callback = send_port != 0 ? on_uac_data_func : nullptr;
+
+	RETURN(uac_start_callback(m_manager, m_device_id, callback, this), int);
 }
 
 /**
@@ -112,6 +120,54 @@ int FlutterUACHolder::get_uac_frame(uint8_t *data, uint32_t *data_len, int64_t *
 int FlutterUACHolder::get_uac_info(uac_info_t &info) {
 	ENTER();
 	RETURN(uac_get_info(m_manager, m_device_id, &info), int);
+}
+
+/*private,static*/
+void FlutterUACHolder::on_uac_data_func(
+	usb_manager_t *manager, int32_t device_id,
+	void *callback_args,
+	uint8_t *data, uint32_t data_len, int64_t pts_us) {
+
+	auto holder = reinterpret_cast<FlutterUACHolder *>(callback_args);
+	if (holder) {
+		holder->on_uac_data(manager, device_id, data, data_len, pts_us);
+	}
+}
+
+/*private*/
+void FlutterUACHolder::on_uac_data(
+	const usb_manager_t *manager, const int32_t &device_id,
+	const uint8_t *data, const uint32_t &data_len, const int64_t &pts_us) {
+//	ENTER();
+
+	const auto send_port = m_send_port;
+
+#if !defined(LOG_NDEBUG)
+	static uint32_t cnt = 0;
+		static uint32_t total_bytes = 0;
+		total_bytes += data_len;
+		if ((++cnt % 1500) == 0) {
+			LOGI("audio data received,%u bytes,total=%u,send_port=%" FMT_INT64_T, data_len, total_bytes, send_port);
+		}
+#endif
+
+	if (LIKELY((m_manager == manager) && (m_device_id == device_id) && (send_port != 0))) {
+		//
+		Dart_CObject data_obj = {
+			.type = Dart_CObject_kTypedData,
+			.value {
+				.as_typed_data {
+					.type = Dart_TypedData_kUint8,
+					.length = (intptr_t)data_len,
+					.values = data,
+				}
+			}
+		};
+
+		Dart_PostCObject_DL(send_port, &data_obj);
+	}
+
+//	EXIT();
 }
 
 } // serenegiant::unity

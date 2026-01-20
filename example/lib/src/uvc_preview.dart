@@ -1,4 +1,4 @@
-// Copyright (c) 2020-2025 saki t_saki@serenegiant.com
+// Copyright (c) 2020-2026 saki t_saki@serenegiant.com
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,6 +13,9 @@
 //  limitations under the License.
 
 import 'dart:async';
+import 'dart:ffi';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -72,6 +75,9 @@ class UVCVideoView extends StatefulWidget {
 class UVCVideoViewState extends State<UVCVideoView> with WidgetsBindingObserver {
   /// UVC機器アクセス用
   late UVCControllerInterface _controller;
+  UACInfo _uacInfo = UACInfo(0, 1, 16, 32000, 512);
+  ReceivePort _uacReceivePort = ReceivePort();
+  late Stream<Uint8List> _uacStream;
   /// 現在の解像度設定
   VideoSize _currentSize = VideoSize(
       7, 0, 640, 480, 0, List.empty(), 0, List.empty(), 0);
@@ -97,6 +103,7 @@ class UVCVideoViewState extends State<UVCVideoView> with WidgetsBindingObserver 
     WidgetsBinding.instance.removeObserver(this);
     await _controller.stop();
     await _controller.releaseTexture();
+    _uacReceivePort.close();
     super.dispose();
   }
 
@@ -110,24 +117,14 @@ class UVCVideoViewState extends State<UVCVideoView> with WidgetsBindingObserver 
     switch (state) {
       case AppLifecycleState.resumed:
         final sz = await _controller.getCurrentSize();
-        final textureId = await _controller.createTexture(sz.width, sz.height);
-        if (_debug) _logger.d("_UVCVideoViewState#textureId=$textureId,sz=$sz");
-        _controller.start();
-        setState(() {
-          _textureId = textureId;
-          _currentSize = sz;
-        });
+        _startUVC(sz);
         break;
       case AppLifecycleState.inactive:
         break;
       case AppLifecycleState.hidden:
         break;
       case AppLifecycleState.paused:
-        await _controller.stop();
-        await _controller.releaseTexture();
-        setState(() {
-          _textureId = -1;
-        });
+        await _stopUVC();
         break;
       case AppLifecycleState.detached:
         break;
@@ -176,14 +173,49 @@ class UVCVideoViewState extends State<UVCVideoView> with WidgetsBindingObserver 
       _logger.w("failed to set video size,sz=$sz/$_currentSize");
       return;
     }
+    _startUVC(sz);
+  }
+
+  /// UVC機器からの映像と音声取得開始処理
+  void _startUVC(VideoSize sz) async {
     final textureId = await _controller.createTexture(sz.width, sz.height);
-    if (_debug) _logger.d("_UVCVideoViewState#textureId=$textureId,sz=$sz");
-    _controller.start();
+    if (_debug) _logger.d("_UVCVideoViewState#_startUVC,textureId=$textureId,sz=$sz");
+    await _controller.start();
+    // FIXME 今のままでもエラーにはならないけど、UACに対応している場合のみstartUACを呼ぶほうがいいかもしれない
+    // UVC機器毎にUAC音声データをStream<Uint8List>として受け取りたいので個別にReceivePortを生成してsendPortを渡す
+    _uacReceivePort.close();
+    _uacReceivePort = ReceivePort();
+    _uacStream = _uacReceivePort.cast<Uint8List>();
+    _uacStream.listen((Uint8List data) {
+      // if (_debug) _logger.d("onData:$data");
+      // FIXME 受け取ったUACからの音声データを再生させる
+      //       ・flutter_soundもflutter_pcm_soundも正常に再生できない,
+      //       ・NDKのoboeやUnity(のSoundClip)へ同じデータを渡すと正常に再生できるのでバックエンド自体は正常
+      //       ・ReceivePortを経由してStream<Uint8List>で受け取っているのがまずいのか
+      //       ・flutter_soundもflutter_pcm_soundのAudioTrackの初期化/処理がまずいのが不明
+      //       ・音的にはAudioTrackへサンプリング周波数が渡されてなさそう？
+    });
+    await _controller.startUAC(_uacReceivePort.sendPort.nativePort);
+    final uacInfo = _controller.getUACInfo();
     setState(() {
       _textureId = textureId;
       _currentSize = sz;
+      _uacInfo = uacInfo;
+      if (_debug) _logger.d("uacInfo=$_uacInfo");
     });
   }
+
+  /// UVC機器からの映像と音声取得を終了
+  Future<void> _stopUVC() async {
+    if (_debug) _logger.d("_UVCVideoViewState#_stopUVC");
+    await _controller.stop();
+    await _controller.releaseTexture();
+    _uacReceivePort.close();
+    setState(() {
+      _textureId = -1;
+    });
+  }
+
 }
 
 /// childを親Widgetの中央にクロップセンター表示するWidget

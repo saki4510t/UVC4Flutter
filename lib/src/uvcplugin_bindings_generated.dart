@@ -325,15 +325,18 @@ class UVCPluginBindings {
   /// @return
   int start_uac(
     int device_id,
+    int send_port,
   ) {
     return _start_uac(
       device_id,
+      send_port,
     );
   }
 
   late final _start_uacPtr =
-      _lookup<ffi.NativeFunction<ffi.Int32 Function(ffi.Int32)>>('start_uac');
-  late final _start_uac = _start_uacPtr.asFunction<int Function(int)>();
+      _lookup<ffi.NativeFunction<ffi.Int32 Function(ffi.Int32, ffi.Int64)>>(
+          'start_uac');
+  late final _start_uac = _start_uacPtr.asFunction<int Function(int, int)>();
 
   /// 音声取得終了
   /// @param device_id
@@ -585,7 +588,7 @@ final class flutter_uac_info extends ffi.Struct {
 /// should match to uac_info_t in aandusb_native.h
 typedef flutter_uac_info_t = flutter_uac_info;
 
-const int MAX_INTERVALS = 128;
+const int MAX_NUM_INTERVALS = 128;
 
 const int FLG_CTRL_SCANNING = 1;
 
@@ -595,53 +598,21 @@ const int FLG_CTRL_AE_PRIORITY = 4;
 
 const int FLG_CTRL_AE_ABS = 8;
 
-const int FLG_CTRL_AE_REL = 16;
-
 const int FLG_CTRL_FOCUS_ABS = 32;
-
-const int FLG_CTRL_FOCUS_REL = 64;
 
 const int FLG_CTRL_IRIS_ABS = 128;
 
-const int FLG_CTRL_IRIS_REL = 256;
-
 const int FLG_CTRL_ZOOM_ABS = 512;
-
-const int FLG_CTRL_ZOOM_REL = 1024;
-
-const int FLG_CTRL_PANTILT_ABS = 2048;
 
 const int FLG_CTRL_PAN_ABS = 16779264;
 
 const int FLG_CTRL_TILT_ABS = 33556480;
 
-const int FLG_CTRL_PANTILT_REL = 4096;
-
-const int FLG_CTRL_PAN_REL = 16781312;
-
-const int FLG_CTRL_TILT_REL = 33558528;
-
 const int FLG_CTRL_ROLL_ABS = 8192;
-
-const int FLG_CTRL_ROLL_REL = 16384;
-
-const int FLG_CTRL_D15 = 32768;
-
-const int FLG_CTRL_D16 = 65536;
 
 const int FLG_CTRL_FOCUS_AUTO = 131072;
 
 const int FLG_CTRL_PRIVACY = 262144;
-
-const int FLG_CTRL_FOCUS_SIMPLE = 524288;
-
-const int FLG_CTRL_WINDOW = 1048576;
-
-const int FLG_CTRL_ROI = 2097152;
-
-const int FLG_CTRL_D22 = 4194304;
-
-const int FLG_CTRL_D23 = 8388608;
 
 const int FLG_PU_BRIGHTNESS = 2147483649;
 
@@ -671,102 +642,22 @@ const int FLG_PU_WB_TEMP_AUTO = 2147487744;
 
 const int FLG_PU_WB_COMPO_AUTO = 2147491840;
 
-const int FLG_PU_DIGITAL_MULT = 2147500032;
-
-const int FLG_PU_DIGITAL_LIMIT = 2147516416;
-
-const int FLG_PU_AVIDEO_STD = 2147549184;
-
-const int FLG_PU_AVIDEO_LOCK = 2147614720;
-
 const int FLG_PU_CONTRAST_AUTO = 2147745792;
 
-const int FLG_PU_D19 = 2148007936;
-
-const int FLG_PU_D20 = 2148532224;
-
-const int FLG_PU_D21 = 2149580800;
-
-const int FLG_PU_D22 = 2151677952;
-
-const int FLG_PU_D23 = 2155872256;
+const int FLG_PU_MASK = 2147483648;
 
 const int FRAME_TYPE_UNKNOWN = 0;
 
-const int FRAME_TYPE_UNCOMPRESSED = 5;
-
 const int FRAME_TYPE_UNCOMPRESSED_YUYV = 65541;
-
-const int FRAME_TYPE_UNCOMPRESSED_UYVY = 131077;
-
-const int FRAME_TYPE_UNCOMPRESSED_GRAY8 = 196613;
-
-const int FRAME_TYPE_UNCOMPRESSED_BY8 = 262149;
 
 const int FRAME_TYPE_UNCOMPRESSED_NV21 = 327685;
 
-const int FRAME_TYPE_UNCOMPRESSED_YV12 = 393221;
-
-const int FRAME_TYPE_UNCOMPRESSED_I420 = 458757;
-
-const int FRAME_TYPE_UNCOMPRESSED_Y16 = 524293;
-
-const int FRAME_TYPE_UNCOMPRESSED_RGBP = 589829;
-
 const int FRAME_TYPE_UNCOMPRESSED_NV12 = 720901;
-
-const int FRAME_TYPE_UNCOMPRESSED_YCbCr = 786437;
 
 const int FRAME_TYPE_UNCOMPRESSED_RGB565 = 851973;
 
-const int FRAME_TYPE_UNCOMPRESSED_RGB = 917509;
-
-const int FRAME_TYPE_UNCOMPRESSED_BGR = 983045;
-
 const int FRAME_TYPE_UNCOMPRESSED_RGBX = 1048581;
-
-const int FRAME_TYPE_UNCOMPRESSED_444p = 1114117;
-
-const int FRAME_TYPE_UNCOMPRESSED_444sp = 1179653;
-
-const int FRAME_TYPE_UNCOMPRESSED_422p = 1245189;
-
-const int FRAME_TYPE_UNCOMPRESSED_422sp = 1310725;
-
-const int FRAME_TYPE_UNCOMPRESSED_440p = 1376261;
-
-const int FRAME_TYPE_UNCOMPRESSED_440sp = 1441797;
-
-const int FRAME_TYPE_UNCOMPRESSED_411p = 1507333;
-
-const int FRAME_TYPE_UNCOMPRESSED_411sp = 1572869;
-
-const int FRAME_TYPE_UNCOMPRESSED_YUV_ANY = 1638405;
-
-const int FRAME_TYPE_UNCOMPRESSED_XRGB = 1703941;
-
-const int FRAME_TYPE_UNCOMPRESSED_XBGR = 1769477;
-
-const int FRAME_TYPE_UNCOMPRESSED_BGRX = 1835013;
 
 const int FRAME_TYPE_MJPEG = 7;
 
-const int FRAME_TYPE_FRAME_BASED = 17;
-
-const int FRAME_TYPE_MPEG2TS = 65553;
-
-const int FRAME_TYPE_DV = 131089;
-
-const int FRAME_TYPE_FRAME_H264 = 196625;
-
-const int FRAME_TYPE_FRAME_VP8 = 262161;
-
 const int FRAME_TYPE_H264 = 20;
-
-const int FRAME_TYPE_H264_SIMULCAST = 65556;
-
-const int FRAME_TYPE_VP8 = 23;
-
-const int FRAME_TYPE_VP8_SIMULCAST = 65559;
-
-const int FRAME_TYPE_H265 = 25;
