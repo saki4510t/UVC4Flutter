@@ -24,10 +24,10 @@ import android.hardware.usb.UsbInterface
 import android.os.Handler
 import android.util.Log
 import androidx.annotation.Keep
-import com.serenegiant.system.PermissionUtils
+import com.serenegiant.content.PermissionUtils
+import com.serenegiant.system.HandlerThreadHandler
+import com.serenegiant.system.UIThreadHelper
 import com.serenegiant.usb.DeviceDetector.Companion.createInstance
-import com.serenegiant.utils.HandlerThreadHandler
-import com.serenegiant.utils.UIThreadHelper
 import java.io.IOException
 
 /**
