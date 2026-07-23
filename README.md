@@ -294,43 +294,12 @@ Example app includes some classes / widgets to help to manage UVC device, start 
 |---------------------------------|---------------------------------------|
 | FRAME_TYPE_UNKNOWN              | Unknown frame type (can't render)     |
 | FRAME_TYPE_UNCOMPRESSED_YUYV    | YUYV/YUY2                             |
-| FRAME_TYPE_UNCOMPRESSED_UYVY    | UYVY                                  |
-| FRAME_TYPE_UNCOMPRESSED_GRAY8   | GRAY8                                 |
-| FRAME_TYPE_UNCOMPRESSED_BY8     | BY8 (can't render)                    |
 | FRAME_TYPE_UNCOMPRESSED_NV21    | NV21                                  |
-| FRAME_TYPE_UNCOMPRESSED_YV12    | YV12                                  |
-| FRAME_TYPE_UNCOMPRESSED_I420    | I420                                  |
-| FRAME_TYPE_UNCOMPRESSED_Y16     | Y16 (can't render)                    |
-| FRAME_TYPE_UNCOMPRESSED_RGBP    | RGBP                                  |
 | FRAME_TYPE_UNCOMPRESSED_NV12    | NV12                                  |
-| FRAME_TYPE_UNCOMPRESSED_YCbCr   | YCbCr                                 |
 | FRAME_TYPE_UNCOMPRESSED_RGB565  | RGB565                                |
-| FRAME_TYPE_UNCOMPRESSED_RGB     | RGB                                   |
-| FRAME_TYPE_UNCOMPRESSED_BGR     | BGR                                   |
 | FRAME_TYPE_UNCOMPRESSED_RGBX    | RGBX                                  |
-| FRAME_TYPE_UNCOMPRESSED_444p    | 444p                                  |
-| FRAME_TYPE_UNCOMPRESSED_444sp   | 444sp                                 |
-| FRAME_TYPE_UNCOMPRESSED_422p    | 422p                                  |
-| FRAME_TYPE_UNCOMPRESSED_422sp   | 422sp                                 |
-| FRAME_TYPE_UNCOMPRESSED_440p    | 440p                                  |
-| FRAME_TYPE_UNCOMPRESSED_440sp   | 440sp                                 |
-| FRAME_TYPE_UNCOMPRESSED_411p    | 411p                                  |
-| FRAME_TYPE_UNCOMPRESSED_411sp   | 411sp                                 |
-| FRAME_TYPE_UNCOMPRESSED_YUV_ANY | YUV ANY(internal, decoded from MJPEG) |
-| FRAME_TYPE_UNCOMPRESSED_XRGB    | XRGB                                  |
-| FRAME_TYPE_UNCOMPRESSED_XBGR    | XBGR                                  |
-| FRAME_TYPE_UNCOMPRESSED_BGRX    | BGRX                                  |
 | FRAME_TYPE_MJPEG                | MJPEG                                 |
-| FRAME_TYPE_FRAME_BASED          | Frame based frame type (can't render) |
-| FRAME_TYPE_MPEG2TS              | MPEG2TS(can't render)                 |
-| FRAME_TYPE_DV                   | DV (can't render)                     |
-| FRAME_TYPE_FRAME_H264           | frame based H264                      |
-| FRAME_TYPE_FRAME_VP8            | frame based VP8                       |
 | FRAME_TYPE_H264                 | H264                                  |
-| FRAME_TYPE_H264_SIMULCAST       | H264 simulcast                        |
-| FRAME_TYPE_VP8                  | VP8                                   |
-| FRAME_TYPE_VP8_SIMULCAST        | VP8 simulcast                         |
-| FRAME_TYPE_H265                 | H265                                  |
 
 ## Video size selection
 
@@ -352,24 +321,14 @@ Example app includes some classes / widgets to help to manage UVC device, start 
 | FLG_CTRL_AE           | Auto-Exposure Mode              | Note1        |
 | FLG_CTRL_AE_PRIORITY  | Auto-Exposure Priority          | Note1        |
 | FLG_CTRL_AE_ABS       | Exposure Time (Absolute)        | Note1        |
-| FLG_CTRL_AE_REL       | Exposure Time (Relative)        |              |
 | FLG_CTRL_FOCUS_ABS    | Focus (Absolute)                |              |
-| FLG_CTRL_FOCUS_REL    | Focus (Relative)                | Note2        |
 | FLG_CTRL_IRIS_ABS	    | Iris (Absolute)                 | Note1        |
-| FLG_CTRL_IRIS_REL	    | Iris (Relative)                 | Note1, Note2 |
 | FLG_CTRL_ZOOM_ABS	    | Zoom (Absolute)                 |              |
-| FLG_CTRL_ZOOM_REL	    | Zoom (Relative)                 | Note2        |
 | FLG_CTRL_PAN_ABS      | PanTilt (Absolute)              |              |
 | FLG_CTRL_TILT_ABS	    | PanTilt (Absolute)              |              |
-| FLG_CTRL_PAN_REL      | PanTilt (Relative)              | Note2        |
-| FLG_CTRL_TILT_REL	    | PanTilt (Relative)              | Note2        |
 | FLG_CTRL_ROLL_ABS	    | Roll (Absolute)                 |              |
-| FLG_CTRL_ROLL_REL	    | Roll (Relative)                 | Note2        |
-| FLG_CTRL_FOCUS_AUTO   | Focus, Auto                     | Note3        |
+| FLG_CTRL_FOCUS_AUTO   | Focus, Auto                     | Note2        |
 | FLG_CTRL_PRIVACY      | Privacy                         |              |
-| FLG_CTRL_FOCUS_SIMPLE | Focus, Simple                   |              |
-| FLG_CTRL_WINDOW       | Window                          |              |
-| FLG_CTRL_ROI          | ROI                             |              |
 | FLG_PU_BRIGHTNESS     | Brightness                      |              |
 | FLG_PU_CONTRAST       | Contrast                        |              |
 | FLG_PU_HUE            | Hue                             |              |
@@ -381,19 +340,14 @@ Example app includes some classes / widgets to help to manage UVC device, start 
 | FLG_PU_BACKLIGHT      | Backlight Compensation          |              |
 | FLG_PU_GAIN           | Gain                            | Note1        |
 | FLG_PU_POWER_LF       | Power Line Frequency            |              |
-| FLG_PU_HUE_AUTO       | Hue, Auto                       | Note3        |
-| FLG_PU_WB_TEMP_AUTO   | White Balance Temperature, Auto | Note3        |
-| FLG_PU_WB_COMPO_AUTO  | White Balance Component, Auto   | Note3        |
-| FLG_PU_DIGITAL_MULT   | Digital Multiplier              |              |
-| FLG_PU_DIGITAL_LIMIT  | Digital Multiplier Limit        |              |
-| FLG_PU_AVIDEO_STD     | Analog Video Standard           |              |
-| FLG_PU_AVIDEO_LOCK    | Analog Video Lock Status        |              |
-| FLG_PU_CONTRAST_AUTO  | Contrast, Auto                  | Note3        |
+| FLG_PU_HUE_AUTO       | Hue, Auto                       | Note2        |
+| FLG_PU_WB_TEMP_AUTO   | White Balance Temperature, Auto | Note2        |
+| FLG_PU_WB_COMPO_AUTO  | White Balance Component, Auto   | Note2        |
+| FLG_PU_CONTRAST_AUTO  | Contrast, Auto                  | Note2        |
 
 * Note1: Auto-Exposure Mode, Auto-Exposure Priority, Exposure Time, Iris, Brightness,
   Gamma, Gain will depend on / be related to each other and may not be able to control under some conditions.
-* Note2: Relative control(s) are not supported on UI of example app.
-* Note3: Auto control(s) are combined into absolute controls on UI of example app.
+* Note2: Auto control(s) are combined into absolute controls on UI of example app.
 
 ## Version history
 
@@ -401,3 +355,4 @@ Example app includes some classes / widgets to help to manage UVC device, start 
 |---------|--------------------------------------------------------------|
 | 1.0.0   | First release                                                |
 | 1.1.0   | Use static libraries of aandusb to use NDK with flutter SDK. |
+| 1.2.0   | Update backed libraries and Flutter SDK and AGP.             |
