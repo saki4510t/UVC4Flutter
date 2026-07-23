@@ -17,7 +17,7 @@ package com.serenegiant.flutter.uvcplugin
 
 import android.app.Activity
 import android.util.Log
-import android.util.LongSparseArray
+import android.util.SparseArray
 import android.view.Surface
 import android.view.WindowManager
 import androidx.annotation.Keep
@@ -38,18 +38,23 @@ import java.lang.ref.WeakReference
  */
 @Keep
 class UVCManager: FlutterPlugin, MethodCallHandler, ActivityAware {
-  /// The MethodChannel that will the communication between Flutter and native Android
-  ///
-  /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-  /// when the Flutter Engine is detached from the Activity
+  /**
+   * The MethodChannel that will the communication between Flutter and native Android
+   * This local reference serves to register the plugin with the Flutter Engine and unregister it
+   * when the Flutter Engine is detached from the Activity
+   */
   private lateinit var mChannel : MethodChannel
   private lateinit var mTextureRegistry: TextureRegistry
   private lateinit var mActivity: WeakReference<Activity>
-  private val mSurfaceProducers = LongSparseArray<TextureRegistry.SurfaceProducer>()
+  /**
+   * デバイスIDとSurfaceProducerのマップ
+   */
+  private val mSurfaceProducers = SparseArray<TextureRegistry.SurfaceProducer>()
   private var mNeedInitialize = false
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     if (DEBUG) Log.v(TAG, "onAttachedToEngine:")
+    NativeLibLoader.loadNative()
     nativeInit()
     mTextureRegistry = flutterPluginBinding.textureRegistry
     mChannel = MethodChannel(flutterPluginBinding.binaryMessenger, METHOD_CHANNEL_NAME)
@@ -93,6 +98,9 @@ class UVCManager: FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
+  /**
+   * MethodCallHandlerインターフェースの実装
+   */
   override fun onMethodCall(call: MethodCall, result: Result) {
     if (DEBUG) Log.v(TAG, "onMethodCall:${call.method}")
     when (call.method) {
@@ -153,6 +161,8 @@ class UVCManager: FlutterPlugin, MethodCallHandler, ActivityAware {
   /**
    * Dart側からのメソッドコールの実体
    * Dart側のTextureで表示するためSurfaceTextureを生成しテクスチャidを返す
+   * XXX 今の仕様的に１つのUVC機器に対して1つのSurface/テキスチャでしか映像を受け取ることができないので
+   *     同じデバイスIDに対して複数回呼び出しても同じテクスチャID(Surface)を返す
    * @param deviceId 対象とするUVC機器のid
    * @param width
    * @param height
@@ -161,9 +171,9 @@ class UVCManager: FlutterPlugin, MethodCallHandler, ActivityAware {
   private fun createTexture(deviceId: Int, width: Int, height: Int): Long {
     if (DEBUG) Log.v(TAG, "createTexture:deviceId=${deviceId}/(${width}x${height})")
     try {
-      val producer = mTextureRegistry.createSurfaceProducer()
+      val producer = mSurfaceProducers[deviceId] ?: mTextureRegistry.createSurfaceProducer()
       producer.setSize(width, height)
-      mSurfaceProducers.append(producer.id(), producer)
+      mSurfaceProducers[deviceId] = producer
       // native側へSurfaceをセット
       nativeSetSurface(deviceId, producer.id(), producer.surface)
       if (DEBUG) Log.v(TAG, "createTexture:producer=${producer}")
@@ -182,9 +192,9 @@ class UVCManager: FlutterPlugin, MethodCallHandler, ActivityAware {
   private fun releaseTexture(deviceId: Int, textureId: Long) {
     if (DEBUG) Log.v(TAG, "releaseTexture:deviceId=${deviceId},textureId=${textureId}")
     nativeSetSurface(deviceId, -1, null)
-    val producer = mSurfaceProducers.get(textureId)
+    val producer = mSurfaceProducers.get(deviceId)
     producer?.release()
-    mSurfaceProducers.remove(textureId)
+    mSurfaceProducers.remove(deviceId)
   }
 
   /**
@@ -213,8 +223,5 @@ class UVCManager: FlutterPlugin, MethodCallHandler, ActivityAware {
     private val TAG = UVCManager::class.java.simpleName
 
     private const val METHOD_CHANNEL_NAME = "com.serenegiant.flutter/aandusb_method"
-    init {
-      NativeLibLoader.loadNative()
-    }
   }
 }

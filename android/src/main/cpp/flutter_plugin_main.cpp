@@ -428,7 +428,7 @@ static int nativeSetSurface(JNIEnv *env, jobject,
 		const auto is_available = pluginJava->is_available(deviceId);
 		if (is_available) {
 			if (jsurface) {
-				LOGD("set surface");
+				LOGD("set surface texId=%lld,surface=%p", texId, jsurface);
 				auto *window = ANativeWindow_fromSurface(env, (jobject)jsurface);
 				result = pluginJava->set_preview_window(deviceId, texId, window);
 			} else {

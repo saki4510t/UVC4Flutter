@@ -123,7 +123,7 @@ void FlutterPluginJava::terminate_all() {
  * @param create_if_absent
  * @return
  */
-FlutterUACHolderSp FlutterPluginJava::get_uac_holder_locked(const int32_t &device_id, const bool &create_if_absent) {
+std::shared_ptr<FlutterUACHolder> FlutterPluginJava::get_uac_holder_locked(const int32_t &device_id, const bool &create_if_absent) {
 	ENTER();
 
 	LOGD("id=%d,create_if_absent=%d", device_id, create_if_absent);
@@ -705,7 +705,6 @@ int FlutterPluginJava::get_uac_frame(const int32_t &device_id, uint8_t *data, ui
 	return result; // RETURN(result, int);
 }
 
-/*static, private*/
 /**
  * USB機器が接続されたときのコールバック関数
  * @param callback_args FlutterPluginJavaへのポインタ
@@ -728,6 +727,7 @@ void FlutterPluginJava::on_device_attach(usb_manager_t*, void *callback_args, in
  * @param callback_args FlutterPluginJavaへのポインタ
  * @param device_id
  */
+/*static, private*/
 void FlutterPluginJava::on_device_detach(usb_manager_t*, void *callback_args, int32_t device_id) {
 	ENTER();
 

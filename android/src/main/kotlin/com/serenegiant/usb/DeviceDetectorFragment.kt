@@ -24,12 +24,10 @@ import android.hardware.usb.UsbInterface
 import android.os.Handler
 import android.util.Log
 import androidx.annotation.Keep
-import com.serenegiant.usb.DeviceDetector.DeviceDetectorCallback
 import com.serenegiant.system.PermissionUtils
-import com.serenegiant.usb.DeviceFilter
-import com.serenegiant.usb.USBMonitor
-import com.serenegiant.usb.UsbConnector
+import com.serenegiant.usb.DeviceDetector.Companion.createInstance
 import com.serenegiant.utils.HandlerThreadHandler
+import com.serenegiant.utils.UIThreadHelper
 import java.io.IOException
 
 /**
@@ -42,9 +40,10 @@ import java.io.IOException
  * Fragmentを使う。
  */
 @Keep
-class DeviceDetectorFragment constructor() : Fragment() {
+@Suppress("deprecation")
+class DeviceDetectorFragment  constructor() : Fragment() {
 	private val mSync = Any()
-	private val mDeviceDetector: DeviceDetector = DeviceDetector.createInstance()
+	private val mDeviceDetector = createInstance()
 	private val mConnectors: MutableMap<UsbDevice, UsbConnector> = HashMap()
 	private var mUSBMonitor: USBMonitor? = null
 	private var mAsyncHandler: Handler? = null
@@ -60,9 +59,7 @@ class DeviceDetectorFragment constructor() : Fragment() {
 		mUSBMonitor = USBMonitor(context, mOnDeviceConnectListener)
 		val args = arguments
 		if (args != null) {
-			val filters: List<DeviceFilter>? = args.getParcelableArrayList(
-				ARGS_DEVICE_FILTERS
-			)
+			val filters: List<DeviceFilter>? = args.getParcelableArrayList(ARGS_DEVICE_FILTERS)
 			if (filters != null) {
 				mUSBMonitor!!.setDeviceFilter(filters)
 			}
@@ -74,16 +71,9 @@ class DeviceDetectorFragment constructor() : Fragment() {
 	@Suppress("deprecation")
 	override fun onStart() {
 		super.onStart()
-		if (DEBUG) Log.v(
-			TAG, "onStart:hasCameraPermission=" + PermissionUtils.hasCamera(
-				activity
-			)
-		)
+		if (DEBUG) Log.v(TAG, "onStart:hasCameraPermission=" + PermissionUtils.hasCamera(activity))
 		if (mUSBMonitor != null) {
-			if (DEBUG) Log.v(
-				TAG,
-				"onStart:register USBMonitor," + mUSBMonitor!!.deviceList + "," + mUSBMonitor!!.deviceCount
-			)
+			if (DEBUG) Log.v(TAG, "onStart:register USBMonitor,${mUSBMonitor!!.deviceList},${mUSBMonitor!!.deviceCount}")
 			mUSBMonitor!!.register()
 		}
 	}
@@ -173,18 +163,26 @@ class DeviceDetectorFragment constructor() : Fragment() {
 
 	private val mOnDeviceConnectListener: USBMonitor.Callback = object : USBMonitor.Callback {
 		override fun onAttach(device: UsbDevice) {
-			if (DEBUG) Log.v(TAG, "Callback#onAttach:" + device.deviceName)
+			if (DEBUG) Log.v(TAG, "Callback#onAttach:${device.deviceName}")
 			if (mUSBMonitor!!.hasPermission(device)) {
 				// すでにパーミッションを保持しているとき
 				addDevice(device)
 			} else {
 				// パーミッションを保持していないとき
-				mUSBMonitor!!.requestPermission(device)
+				// システム側から表示されるUSBアクセス権限要求のボトムシートより
+				// アプリから要求して表示されるUSBアクセス権限要求ダイアログが上に
+				// 表示されるようにフォアグラウンドにしてからUSBアクセス権限を要求する
+				bringToForeground()
+				UIThreadHelper.runOnUiThread({
+					mUSBMonitor!!.requestPermission(
+						device
+					)
+				}, 100)
 			}
 		}
 
 		override fun onPermission(device: UsbDevice) {
-			if (DEBUG) Log.v(TAG, "Callback#onPermission:" + device.deviceName)
+			if (DEBUG) Log.v(TAG, "Callback#onPermission:${device.deviceName}")
 			addDevice(device)
 			// システムダイアログが表示されている状態でアプリ上に表示されているパーミッションダイアログで許可すると
 			// システムダイアログが表示されたままになるのでアプリをフォアグラウンドへ移動させる
@@ -195,20 +193,20 @@ class DeviceDetectorFragment constructor() : Fragment() {
 			device: UsbDevice,
 			connector: UsbConnector
 		) {
-			if (DEBUG) Log.v(TAG, "Callback#onConnected:" + device.deviceName)
+			if (DEBUG) Log.v(TAG, "Callback#onConnected:${device.deviceName}")
 		}
 
 		override fun onDisconnect(device: UsbDevice) {
-			if (DEBUG) Log.v(TAG, "Callback#onDisconnect:" + device.deviceName)
+			if (DEBUG) Log.v(TAG, "Callback#onDisconnect:${device.deviceName}")
 		}
 
 		override fun onDetach(device: UsbDevice) {
-			if (DEBUG) Log.v(TAG, "Callback#onDetach:" + device.deviceName)
+			if (DEBUG) Log.v(TAG, "Callback#onDetach:${device.deviceName}")
 			removeDevice(device)
 		}
 
 		override fun onCancel(device: UsbDevice) {
-			if (DEBUG) Log.v(TAG, "Callback#onCancel:" + device.deviceName)
+			if (DEBUG) Log.v(TAG, "Callback#onCancel:${device.deviceName}")
 		}
 
 		override fun onError(device: UsbDevice?, t: Throwable) {
@@ -216,8 +214,7 @@ class DeviceDetectorFragment constructor() : Fragment() {
 		}
 	}
 
-	private val mDeviceDetectorCallback
-		: DeviceDetectorCallback = object : DeviceDetectorCallback {
+	private val mDeviceDetectorCallback = object : DeviceDetector.DeviceDetectorCallback {
 		override fun onRequestRefreshDevices() {
 			if (DEBUG) Log.v(TAG, "onRequestRefreshDevices:")
 			// native側からの接続機器一覧更新要求
@@ -236,7 +233,7 @@ class DeviceDetectorFragment constructor() : Fragment() {
 		override fun onRequestClaimInterfaces(
 			device: UsbDevice, interfaces: List<UsbInterface?>
 		): Boolean {
-			if (DEBUG) Log.v(TAG, "onRequestClaimInterfaces:" + device.deviceName)
+			if (DEBUG) Log.v(TAG, "onRequestClaimInterfaces:${device.deviceName}")
 			var result = false
 
 			synchronized(mConnectors) {
@@ -257,7 +254,7 @@ class DeviceDetectorFragment constructor() : Fragment() {
 		override fun onRequestReleaseInterfaces(
 			device: UsbDevice, interfaces: List<UsbInterface?>
 		): Boolean {
-			if (DEBUG) Log.v(TAG, "onRequestReleaseInterfaces:" + device.deviceName)
+			if (DEBUG) Log.v(TAG, "onRequestReleaseInterfaces:${device.deviceName}")
 			var result = false
 
 			synchronized(mConnectors) {

@@ -1,11 +1,10 @@
 <manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.serenegiant.uvc_manager">
+	xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
-    <uses-feature android:name="android.hardware.usb.host" android:required="true"/>
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
+	<uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+	<uses-feature android:name="android.hardware.usb.host" android:required="true"/>
+	<uses-feature android:name="android.hardware.camera" android:required="false" />
 
-    <!-- targetSdkVersion=28 needs this permission to request to access to UVC device on Android9 -->
-    <uses-permission android:name="android.permission.CAMERA"/>
+	<!-- targetSdkVersion=28 needs this permission to request to access to UVC device on Android9 -->
+	<uses-permission android:name="android.permission.CAMERA"/>
 </manifest>

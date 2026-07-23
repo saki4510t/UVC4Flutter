@@ -1,4 +1,4 @@
-/**
+/*
  * aAndUsb
  * Copyright (c) 2014-2026 saki t_saki@serenegiant.com
  *
@@ -22,7 +22,7 @@ namespace serenegiant::egl {
 
 //================================================================================
 /**
- * egl::GLSurface, egl::EglImageWrapper等のOpenGLGLESのSurface系クラスが実装する関数を
+ * egl::EglSurface, egl::EglImageWrapper等のOpenGLGLESのSurface系クラスが実装する関数を
  * 定義するための純粋仮想クラス
  */
 class IGLSurface {

@@ -1,4 +1,4 @@
-/**
+/*
  * aAndUsb
  * Copyright (c) 2014-2026 saki t_saki@serenegiant.com
  *

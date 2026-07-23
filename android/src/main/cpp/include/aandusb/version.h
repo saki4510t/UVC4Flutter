@@ -1,4 +1,4 @@
-/**
+/*
  * aAndUsb
  * Copyright (c) 2014-2026 saki t_saki@serenegiant.com
  *
@@ -16,15 +16,15 @@
  */
 
 #ifndef LIBAANDUSB_MAJOR
-#define LIBAANDUSB_MAJOR 10
+#define LIBAANDUSB_MAJOR 11
 #endif
 #ifndef LIBAANDUSB_MINOR
-#define LIBAANDUSB_MINOR 18
+#define LIBAANDUSB_MINOR 1
 #endif
 #ifndef LIBAANDUSB_BUILD
-#define LIBAANDUSB_BUILD 1
+#define LIBAANDUSB_BUILD 0
 #endif
 
 #ifndef LIBAANDUSB_VERSION_INT
-#define LIBAANDUSB_VERSION_INT 215
+#define LIBAANDUSB_VERSION_INT 221
 #endif

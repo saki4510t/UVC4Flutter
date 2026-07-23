@@ -79,14 +79,6 @@ android {
         implementation "androidx.core:core-ktx:1.13.0"
         implementation "androidx.appcompat:appcompat:1.7.1"
         implementation("com.serenegiant:common:9.16.0")
-        // XXX example側のaarを参照する...
-        //     プラグイン側でローカルaarとして取り込んで、example画家へダミーのmavenレポジトリとして
-        //     アクセスできるように設定すると、Androidのプロジェクトとして開けばビルド・実行可能だけど、
-        //     Flutterのプロジェクトとして開いてmain.dartを実行しようとすると現行のFlutter SDKでは
-        //     エラーになってビルドできないので仕方なくexample側へモジュールとしてaarをインポートして
-        //     プラグイン側から参照するようにした。
-//        implementation project(":aandusb-release")
-//        implementation project(":flutter-uvc-plugin-release")
     }
 
     testOptions {

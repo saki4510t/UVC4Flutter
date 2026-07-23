@@ -17,15 +17,12 @@ package com.serenegiant.usb
  */
 
 import android.app.Activity
-import android.app.FragmentManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbInterface
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.Keep
 import androidx.annotation.XmlRes
-import com.serenegiant.usb.DeviceFilter
-import com.serenegiant.usb.UsbUtils
 import com.serenegiant.uvc_manager.R
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -54,9 +51,8 @@ class DeviceDetector private constructor() {
 	}
 
 	//--------------------------------------------------------------------------------
-	private val mCallbacks: MutableSet<DeviceDetectorCallback> =
-		CopyOnWriteArraySet<DeviceDetectorCallback>()
-	private val mDevices: MutableMap<String, UsbDevice> = HashMap<String, UsbDevice>()
+	private val mCallbacks: MutableSet<DeviceDetectorCallback> = CopyOnWriteArraySet()
+	private val mDevices: MutableMap<String, UsbDevice> = HashMap()
 
 	/**
 	 * コンストラクタ
@@ -77,7 +73,7 @@ class DeviceDetector private constructor() {
 	 * @param fileDescriptor USB機器へアクセスするためのファイルディスクリプタ
 	 */
 	fun add(device: UsbDevice, fileDescriptor: Int) {
-		val name: String = device.deviceName
+		val name = device.deviceName
 		if (DEBUG) Log.v(TAG, "add:$name")
 		mDevices[name] = device
 		nativeAdd(name, fileDescriptor)
@@ -88,7 +84,7 @@ class DeviceDetector private constructor() {
 	 * @param device 取り外されたUSB機器を示すUsbDevice
 	 */
 	fun remove(device: UsbDevice) {
-		val name: String = device.deviceName
+		val name = device.deviceName
 		if (DEBUG) Log.v(TAG, "remove:$name")
 		nativeRemove(name)
 		mDevices.remove(name)
@@ -134,14 +130,10 @@ class DeviceDetector private constructor() {
 		name: String,
 		clazz: Int, subClass: Int, protocol: Int
 	) {
-		val device: UsbDevice? = if (mDevices.containsKey(name)) mDevices[name] else null
-		if (DEBUG) Log.v(
-			TAG,
-			"onRequestClaimInterfaces:" + (device?.deviceName ?: "")
-		)
+		val device = if (mDevices.containsKey(name)) mDevices[name] else null
+		if (DEBUG) Log.v(TAG, "onRequestClaimInterfaces:${ (device?.deviceName ?: "")}")
 		if (device != null) {
-			val interfaces: List<UsbInterface?> =
-				UsbUtils.findInterfaces(device, clazz, subClass, protocol)
+			val interfaces = UsbUtils.findInterfaces(device, clazz, subClass, protocol)
 			for (callback in mCallbacks) {
 				callback.onRequestClaimInterfaces(device, interfaces)
 			}
@@ -161,14 +153,10 @@ class DeviceDetector private constructor() {
 		name: String,
 		clazz: Int, subClass: Int, protocol: Int
 	) {
-		val device: UsbDevice? = if (mDevices.containsKey(name)) mDevices[name] else null
-		if (DEBUG) Log.v(
-			TAG,
-			"onRequestReleaseInterfaces:" + (device?.deviceName ?: "")
-		)
+		val device = if (mDevices.containsKey(name)) mDevices[name] else null
+		if (DEBUG) Log.v(TAG, "onRequestReleaseInterfaces:${(device?.deviceName ?: "")}")
 		if (device != null) {
-			val interfaces: List<UsbInterface?> =
-				UsbUtils.findInterfaces(device, clazz, subClass, protocol)
+			val interfaces = UsbUtils.findInterfaces(device, clazz, subClass, protocol)
 			for (callback in mCallbacks) {
 				callback.onRequestReleaseInterfaces(device, interfaces)
 			}
@@ -214,7 +202,7 @@ class DeviceDetector private constructor() {
 			activity: Activity, @XmlRes filtersXml: Int
 		) {
 			if (DEBUG) Log.v(TAG, "initDeviceDetector:")
-			val fm: FragmentManager = activity.getFragmentManager()
+			val fm = activity.fragmentManager
 			var detector = fm.findFragmentByTag(DeviceDetectorFragment::class.java.name)
 			if (detector !is DeviceDetectorFragment) {
 				val ft = fm.beginTransaction()
@@ -222,7 +210,7 @@ class DeviceDetector private constructor() {
 					ft.remove(detector)
 				}
 				detector = DeviceDetectorFragment()
-				val args: Bundle = Bundle()
+				val args = Bundle()
 				if (filtersXml != 0) {
 					val filters = ArrayList(DeviceFilter.getDeviceFilters(activity, filtersXml))
 					args.putParcelableArrayList(ARGS_DEVICE_FILTERS, filters)
@@ -240,13 +228,11 @@ class DeviceDetector private constructor() {
 		@Keep
 		fun releaseDeviceDetector(activity: Activity) {
 			if (DEBUG) Log.v(TAG, "releaseDeviceDetector:")
-			val fm: FragmentManager = activity.getFragmentManager()
+			val fm = activity.fragmentManager
 			val detector = fm.findFragmentByTag(DeviceDetectorFragment::class.java.name)
 			if (detector != null) {
 				val ft = fm.beginTransaction()
-				if (detector != null) {
-					ft.remove(detector)
-				}
+				ft.remove(detector)
 				ft.commit()
 			}
 		}
